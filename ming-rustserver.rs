@@ -5,9 +5,13 @@ use std::io::BufReader;
 use std::thread;
 use std::str;
 
-
+/*
+  创建TcpListener 绑定端口为本机的8888 
+  并打印客户端的ip及端口
+ 
+*/
 fn listen(tx_pipe: mpsc::Sender<u32>){
-    let listener = TcpListener::bind("127.0.0.1:7777").unwrap();
+    let listener = TcpListener::bind("127.0.0.1:8888").unwrap();
 
     for stream in listener.incoming(){
         match stream{
@@ -25,6 +29,11 @@ fn listen(tx_pipe: mpsc::Sender<u32>){
 
     drop(listener);
 }
+
+/*
+  接受客户端的流处理
+  并打印出客户端的信息 
+*/
 
 fn connect_handler(stream: TcpStream, tx_pipe: mpsc::Sender<u32>){
     let mut buf = BufReader::new(stream.try_clone().unwrap());
@@ -48,6 +57,14 @@ fn connect_handler(stream: TcpStream, tx_pipe: mpsc::Sender<u32>){
     println!("Client {}:{} dropped", stream.peer_addr().unwrap().ip(), stream.peer_addr().unwrap().port());
     stream.shutdown(Shutdown::Both).unwrap();
 }
+
+/*
+  主函数
+  启动tcp服务器
+  监听ctrl+c退出 
+  模式匹配
+*/
+
 
 fn main(){
     println!("Initializing");
